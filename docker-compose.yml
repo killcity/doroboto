@@ -1,13 +1,17 @@
 services:
   # Next.js Frontend
   frontend:
-    build:
-      context: ./doroboto-ui
-      dockerfile: Dockerfile.frontend
+    # Use pre-built image from GitHub Container Registry
+    # For development, comment out 'image' and uncomment 'build' section
+    image: ghcr.io/killcity/doroboto-frontend:latest
+    # build:
+    #   context: ./doroboto-ui
+    #   dockerfile: Dockerfile.frontend
+    container_name: doroboto-frontend
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://localhost:5001
     volumes:
       - ./doroboto-ui/src:/app/src
@@ -21,6 +25,8 @@ services:
       # Named volumes for node_modules and .next to persist across container restarts
       - frontend_node_modules:/app/node_modules
       - frontend_next:/app/.next
+      # Persist Next.js cache for faster rebuilds
+      - frontend_next_cache:/app/.next
     depends_on:
       - backend
     restart: unless-stopped
@@ -29,17 +35,21 @@ services:
 
   # Node.js Backend
   backend:
-    build:
-      context: ./doroboto-ui
-      dockerfile: Dockerfile.backend
+    # Use pre-built image from GitHub Container Registry
+    # For development, comment out 'image' and uncomment 'build' section
+    image: ghcr.io/killcity/doroboto-backend:latest
+    # build:
+    #   context: ./doroboto-ui
+    #   dockerfile: Dockerfile.backend
+    container_name: doroboto-backend
     ports:
       - "5001:5001"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=5001
     volumes:
-      - ./uploads:/app/uploads
-      - ./test_files:/app/test_files
+      - ./doroboto-ui/uploads:/app/uploads
+      - ./doroboto-ui/test_files:/app/test_files
       - ./doroboto-ui/backend:/app/backend
       - ./doroboto-ui/package.json:/app/package.json
       - ./doroboto-ui/package-lock.json:/app/package-lock.json
@@ -48,11 +58,19 @@ services:
     restart: unless-stopped
     networks:
       - doroboto-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   frontend_node_modules:
   frontend_next:
   backend_node_modules:
+  frontend_next_cache:
+    driver: local
 
 networks:
   doroboto-network:

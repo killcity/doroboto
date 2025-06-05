@@ -35,7 +35,7 @@ The application will be available at `http://localhost:3000` (or next available 
 
 ### 🐳 Docker Deployment (Recommended)
 
-For easy deployment on both **x86** and **ARM64** (Raspberry Pi) systems:
+For easy deployment on both **x86** and **ARM64** (Raspberry Pi) systems using pre-built images from GitHub Container Registry:
 
 ```bash
 # Clone the repository
@@ -45,8 +45,11 @@ cd doroboto
 # Make startup script executable
 chmod +x docker-start.sh
 
-# Start with Docker (auto-detects architecture)
-./docker-start.sh
+# Start with Docker (production mode - uses registry images)
+./docker-start.sh prod start
+
+# Or start in development mode (builds locally)
+./docker-start.sh dev start
 ```
 
 **Access the application:**
@@ -55,12 +58,26 @@ chmod +x docker-start.sh
 
 **Docker Commands:**
 ```bash
-./docker-start.sh start    # Start services
-./docker-start.sh stop     # Stop services
-./docker-start.sh restart  # Restart services
-./docker-start.sh logs     # View logs
-./docker-start.sh status   # Check status
+# Production mode (uses pre-built images)
+./docker-start.sh prod start    # Start services
+./docker-start.sh prod stop     # Stop services
+./docker-start.sh prod restart  # Restart services
+./docker-start.sh prod logs     # View logs
+./docker-start.sh prod pull     # Pull latest images
+
+# Development mode (builds locally)
+./docker-start.sh dev start     # Start with local build
+./docker-start.sh dev build     # Rebuild images
+./docker-start.sh dev logs      # View logs
 ```
+
+**🏗️ Automated Builds:**
+- Images are automatically built for both architectures using GitHub Actions
+- **Registry**: GitHub Container Registry (ghcr.io)
+- **Images**: 
+  - `ghcr.io/killcity/doroboto-frontend:latest`
+  - `ghcr.io/killcity/doroboto-backend:latest`
+- **Triggers**: Push to main, pull requests, and git tags
 
 **Supported Architectures:**
 - ✅ **x86_64** (Intel/AMD desktop/server)
@@ -238,6 +255,30 @@ npm run build
 
 # Start production server
 npm start
+```
+
+### 🔄 CI/CD Pipeline
+
+The project uses GitHub Actions for automated building and deployment:
+
+**Workflow Triggers:**
+- **Push to main**: Builds and publishes `latest` images
+- **Pull requests**: Builds images for testing (not published)
+- **Git tags** (e.g., `v1.0.0`): Creates versioned releases
+
+**Build Process:**
+- Multi-architecture builds (AMD64 + ARM64)
+- Docker layer caching for faster builds
+- Automatic tagging and versioning
+- Published to GitHub Container Registry (ghcr.io)
+
+**Local Development with Docker:**
+```bash
+# Development mode (builds locally)
+./docker-start.sh dev start
+
+# Production mode (uses registry images)
+./docker-start.sh prod start
 ```
 
 ### Adding Features

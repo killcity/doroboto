@@ -1,0 +1,52 @@
+services:
+  frontend:
+    # Build locally for development
+    build:
+      context: ./doroboto-ui
+      dockerfile: Dockerfile.frontend
+    container_name: doroboto-frontend-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:5001
+    depends_on:
+      - backend
+    networks:
+      - doroboto-network
+    volumes:
+      # Mount source code for hot reloading
+      - ./doroboto-ui:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+
+  backend:
+    # Build locally for development
+    build:
+      context: ./doroboto-ui
+      dockerfile: Dockerfile.backend
+    container_name: doroboto-backend-dev
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+    networks:
+      - doroboto-network
+    volumes:
+      # Mount source code for hot reloading
+      - ./doroboto-ui/backend:/app/backend
+      - ./doroboto-ui/package.json:/app/package.json
+      - ./doroboto-ui/uploads:/app/uploads
+      - ./doroboto-ui/test_files:/app/test_files
+      - backend_node_modules_dev:/app/node_modules
+    restart: unless-stopped
+
+networks:
+  doroboto-network:
+    driver: bridge
+
+volumes:
+  backend_node_modules_dev:
+    driver: local 

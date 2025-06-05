@@ -1,330 +1,372 @@
-# DoRoboto Docker Deployment
+# DoRoboto Docker Deployment Guide
 
-This guide covers running DoRoboto using Docker with support for both **ARM64** (Raspberry Pi) and **x86** architectures.
+This guide covers Docker deployment for the DoRoboto pen plotter control system, supporting both x86_64 and ARM64 architectures (including Raspberry Pi).
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Production Mode (Recommended)
+Uses pre-built images from GitHub Container Registry:
 
-- Docker (20.10+)
-- Docker Compose (2.0+)
+```bash
+# Start the application
+./docker-start.sh prod start
+
+# View logs
+./docker-start.sh prod logs
+
+# Stop the application
+./docker-start.sh prod stop
+```
+
+### Development Mode
+Builds images locally for development:
+
+```bash
+# Start with local build
+./docker-start.sh dev start
+
+# Rebuild images
+./docker-start.sh dev build
+
+# View logs
+./docker-start.sh dev logs
+```
+
+## 📦 Container Registry
+
+DoRoboto uses GitHub Container Registry (ghcr.io) for hosting pre-built Docker images:
+
+- **Frontend**: `ghcr.io/killcity/doroboto-frontend:latest`
+- **Backend**: `ghcr.io/killcity/doroboto-backend:latest`
+
+### Supported Architectures
+- ✅ `linux/amd64` (x86_64)
+- ✅ `linux/arm64` (ARM64/Raspberry Pi)
+
+Images are automatically built for both architectures using GitHub Actions.
+
+## 🔄 CI/CD Pipeline
+
+### Automatic Image Building
+GitHub Actions automatically builds and publishes Docker images when:
+
+- **Push to main branch**: Creates `latest` tag
+- **Pull requests**: Creates PR-specific tags for testing
+- **Git tags**: Creates versioned releases (e.g., `v1.0.0`)
+
+### Workflow Features
+- Multi-architecture builds (AMD64 + ARM64)
+- Layer caching for faster builds
+- Automatic tagging and versioning
+- Security scanning and vulnerability checks
+
+### Manual Image Pull
+```bash
+# Pull latest images manually
+docker pull ghcr.io/killcity/doroboto-frontend:latest
+docker pull ghcr.io/killcity/doroboto-backend:latest
+
+# Or use the script
+./docker-start.sh prod pull
+```
+
+## 🛠️ Installation & Setup
+
+### Prerequisites
+- Docker Engine 20.10+ or Docker Desktop
+- Docker Compose v2.0+ (or docker-compose v1.29+)
 - 4GB+ RAM recommended
 - 2GB+ free disk space
 
-### Installation
+### Architecture Detection
+The system automatically detects your architecture:
+- **x86_64**: Intel/AMD processors
+- **ARM64**: Apple Silicon, Raspberry Pi 4+, ARM servers
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/killcity/doroboto.git
-   cd doroboto
-   ```
-
-2. **Make the startup script executable:**
-   ```bash
-   chmod +x docker-start.sh
-   ```
-
-3. **Start the application:**
-   ```bash
-   ./docker-start.sh
-   ```
-
-4. **Access the application:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5001
-
-## 🏗️ Architecture Support
-
-### Automatic Detection
-The startup script automatically detects your system architecture:
-
-- **x86_64**: Standard desktop/server systems
-- **ARM64/aarch64**: Raspberry Pi 4, Apple Silicon Macs, ARM servers
-
-### Manual Platform Selection
-To force a specific platform:
-
+### Quick Setup
 ```bash
-# For x86 systems
-DOCKER_DEFAULT_PLATFORM=linux/amd64 ./docker-start.sh
+# Clone the repository
+git clone https://github.com/killcity/doroboto.git
+cd doroboto
 
-# For ARM64 systems (Raspberry Pi)
-DOCKER_DEFAULT_PLATFORM=linux/arm64 ./docker-start.sh
+# Make the script executable
+chmod +x docker-start.sh
+
+# Start the application (production mode)
+./docker-start.sh prod start
 ```
 
 ## 📋 Available Commands
 
+### Production Mode Commands
 ```bash
-# Start services (default)
-./docker-start.sh start
-
-# Stop services
-./docker-start.sh stop
-
-# Restart services
-./docker-start.sh restart
-
-# View logs
-./docker-start.sh logs
-
-# Check service status
-./docker-start.sh status
-
-# Build images only
-./docker-start.sh build
+./docker-start.sh prod start     # Start with registry images
+./docker-start.sh prod stop      # Stop the application
+./docker-start.sh prod restart   # Restart the application
+./docker-start.sh prod logs      # Show application logs
+./docker-start.sh prod status    # Show container status
+./docker-start.sh prod pull      # Pull latest images
+./docker-start.sh prod clean     # Clean up everything
 ```
 
-## 🐳 Docker Compose Services
+### Development Mode Commands
+```bash
+./docker-start.sh dev start      # Start with local build
+./docker-start.sh dev stop       # Stop the application
+./docker-start.sh dev restart    # Restart the application
+./docker-start.sh dev logs       # Show application logs
+./docker-start.sh dev status     # Show container status
+./docker-start.sh dev build      # Build/rebuild images
+./docker-start.sh dev clean      # Clean up everything
+```
 
-### Frontend Service
-- **Image**: Next.js 14 with TypeScript
-- **Port**: 3000
-- **Features**: 
-  - Standalone output for optimal Docker performance
-  - Hot reload in development
-  - Optimized production builds
+### Default Mode
+If no mode is specified, production mode is used:
+```bash
+./docker-start.sh start          # Same as 'prod start'
+./docker-start.sh logs           # Same as 'prod logs'
+```
 
-### Backend Service
-- **Image**: Node.js 18 with Express + Socket.IO
-- **Port**: 5001
-- **Features**:
-  - Virtual GRBL plotter simulation
-  - Real-time WebSocket communication
-  - Health check endpoint
-  - File upload support
+## 🌐 Access URLs
+
+Once started, the application is available at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5001
+- **Health Check**: http://localhost:5001/api/health
+
+## 📁 File Structure
+
+```
+doroboto/
+├── docker-compose.yml          # Production compose (registry images)
+├── docker-compose.dev.yml      # Development compose (local build)
+├── docker-start.sh             # Management script
+├── .github/
+│   └── workflows/
+│       └── docker-build.yml    # CI/CD pipeline
+└── doroboto-ui/
+    ├── Dockerfile.frontend     # Frontend image definition
+    ├── Dockerfile.backend      # Backend image definition
+    ├── uploads/                # Persistent file uploads
+    └── test_files/             # Sample G-code files
+```
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+#### Frontend Container
+- `NODE_ENV`: Set to `production` or `development`
+- `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:5001)
 
-```env
-# Frontend Configuration
-NEXT_PUBLIC_API_URL=http://localhost:5001
-
-# Backend Configuration
-NODE_ENV=production
-PORT=5001
-
-# Docker Configuration
-COMPOSE_PROJECT_NAME=doroboto
-```
+#### Backend Container
+- `NODE_ENV`: Set to `production` or `development`
+- `PORT`: Server port (default: 5001)
 
 ### Volume Mounts
+- `./doroboto-ui/uploads`: Persistent file uploads
+- `./doroboto-ui/test_files`: Sample G-code files
+- Named volumes for node_modules and build cache
 
-The following directories are mounted for persistence:
+### Port Configuration
+To change default ports, edit the compose files:
+```yaml
+services:
+  frontend:
+    ports:
+      - "3000:3000"  # Change first port for external access
+  backend:
+    ports:
+      - "5001:5001"  # Change first port for external access
+```
 
-- `./uploads` → Container uploads directory
-- `./test_files` → Container test files directory
-- Named volumes for `node_modules` (performance optimization)
+## 🥧 Raspberry Pi Deployment
 
-## 🥧 Raspberry Pi Specific Setup
-
-### System Requirements
+### Recommended Hardware
 - Raspberry Pi 4 (4GB+ RAM recommended)
-- Raspberry Pi OS (64-bit)
-- Docker installed via convenience script
+- 32GB+ microSD card (Class 10 or better)
+- Stable power supply (3A+ recommended)
 
-### Installation on Raspberry Pi
+### Installation Steps
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
 
-1. **Install Docker:**
-   ```bash
-   curl -fsSL https://get.docker.com -o get-docker.sh
-   sudo sh get-docker.sh
-   sudo usermod -aG docker $USER
-   ```
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
 
-2. **Install Docker Compose:**
-   ```bash
-   sudo apt update
-   sudo apt install docker-compose-plugin
-   ```
+# Logout and login again, then:
+git clone https://github.com/killcity/doroboto.git
+cd doroboto
+chmod +x docker-start.sh
+./docker-start.sh prod start
+```
 
-3. **Optimize for ARM64:**
-   ```bash
-   # Enable memory cgroup (add to /boot/cmdline.txt)
-   sudo nano /boot/cmdline.txt
-   # Add: cgroup_enable=memory cgroup_memory=1
-   
-   # Reboot
-   sudo reboot
-   ```
+### Performance Optimization
+```bash
+# Increase swap space for building (if needed)
+sudo dphys-swapfile swapoff
+sudo sed -i 's/CONF_SWAPSIZE=100/CONF_SWAPSIZE=1024/' /etc/dphys-swapfile
+sudo dphys-swapfile setup
+sudo dphys-swapfile swapon
 
-4. **Start DoRoboto:**
-   ```bash
-   git clone https://github.com/killcity/doroboto.git
-   cd doroboto
-   chmod +x docker-start.sh
-   ./docker-start.sh
-   ```
+# Enable memory cgroup (add to /boot/cmdline.txt)
+cgroup_enable=memory cgroup_memory=1
+```
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
-**Port conflicts:**
+#### Docker Not Running
 ```bash
-# Check what's using the ports
-sudo netstat -tulpn | grep :3000
-sudo netstat -tulpn | grep :5001
+# Check Docker status
+docker info
 
-# Stop conflicting services
-./docker-start.sh stop
+# Start Docker (Linux)
+sudo systemctl start docker
+
+# Start Docker Desktop (macOS/Windows)
+# Use the Docker Desktop application
 ```
 
-**Memory issues on Raspberry Pi:**
+#### Port Already in Use
 ```bash
-# Check memory usage
+# Check what's using the port
+sudo lsof -i :3000
+sudo lsof -i :5001
+
+# Stop conflicting services or change ports in compose files
+```
+
+#### Permission Issues
+```bash
+# Fix upload directory permissions
+sudo chown -R $USER:$USER doroboto-ui/uploads
+chmod 755 doroboto-ui/uploads
+```
+
+#### Memory Issues (Raspberry Pi)
+```bash
+# Check available memory
 free -h
+
+# Stop other services to free memory
+sudo systemctl stop unnecessary-service
+
+# Use development mode for lighter resource usage
+./docker-start.sh dev start
+```
+
+#### Image Pull Issues
+```bash
+# Check internet connectivity
+ping ghcr.io
+
+# Login to GitHub Container Registry (if needed)
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+
+# Force pull latest images
+./docker-start.sh prod pull
+```
+
+### Debug Mode
+Enable verbose logging:
+```bash
+# Show detailed container logs
+./docker-start.sh prod logs
+
+# Check container health
+docker ps
+docker inspect doroboto-frontend
+docker inspect doroboto-backend
+
+# Access container shell for debugging
+docker exec -it doroboto-backend /bin/sh
+```
+
+### Performance Monitoring
+```bash
+# Monitor resource usage
 docker stats
 
-# Increase swap if needed
-sudo dphys-swapfile swapoff
-sudo nano /etc/dphys-swapfile  # Set CONF_SWAPSIZE=2048
-sudo dphys-swapfile setup
-sudo dphys-swapfile swapon
+# Check container health
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
-**Build failures:**
+## 🔒 Security Considerations
+
+### Production Deployment
+- Change default ports if exposing to internet
+- Use reverse proxy (nginx/traefik) for SSL termination
+- Implement proper firewall rules
+- Regular security updates for base images
+- Monitor container logs for suspicious activity
+
+### Network Security
 ```bash
-# Clean Docker cache
-docker system prune -a
-
-# Rebuild from scratch
-./docker-start.sh build
+# Restrict external access (example)
+iptables -A INPUT -p tcp --dport 3000 -s 192.168.1.0/24 -j ACCEPT
+iptables -A INPUT -p tcp --dport 3000 -j DROP
 ```
+
+## 📊 Monitoring & Maintenance
 
 ### Health Checks
+The backend includes built-in health checks:
+- Endpoint: `http://localhost:5001/api/health`
+- Automatic container restart on failure
+- 30-second check intervals
 
-Check service health:
+### Log Management
 ```bash
-# Backend health
-curl http://localhost:5001/api/health
+# View logs with timestamps
+./docker-start.sh prod logs --timestamps
 
-# Frontend health
-curl http://localhost:3000
-
-# Docker health status
-docker ps
-```
-
-### Logs and Debugging
-
-```bash
-# View all logs
-./docker-start.sh logs
-
-# View specific service logs
-docker-compose logs frontend
-docker-compose logs backend
+# Limit log output
+./docker-start.sh prod logs --tail 100
 
 # Follow logs in real-time
-docker-compose logs -f backend
+./docker-start.sh prod logs -f
 ```
 
-## 🚀 Production Deployment
-
-### Security Considerations
-
-1. **Change default ports** (optional):
-   ```yaml
-   # In docker-compose.yml
-   ports:
-     - "8080:3000"  # Frontend
-     - "8081:5001"  # Backend
-   ```
-
-2. **Use environment files**:
-   ```bash
-   # Create production.env
-   NODE_ENV=production
-   NEXT_TELEMETRY_DISABLED=1
-   ```
-
-3. **Enable HTTPS** (with reverse proxy):
-   ```bash
-   # Example with nginx
-   sudo apt install nginx
-   # Configure SSL certificates
-   ```
-
-### Performance Optimization
-
-1. **Resource limits**:
-   ```yaml
-   # Add to docker-compose.yml services
-   deploy:
-     resources:
-       limits:
-         memory: 1G
-         cpus: '0.5'
-   ```
-
-2. **Multi-stage builds** (already implemented):
-   - Optimized image sizes
-   - Separate build and runtime environments
-   - Minimal attack surface
-
-## 📊 Monitoring
-
-### Built-in Health Checks
-
-- Backend: `GET /api/health`
-- Docker health checks every 30 seconds
-- Automatic restart on failure
-
-### Resource Monitoring
-
+### Updates
 ```bash
-# Real-time resource usage
-docker stats
+# Update to latest images (production)
+./docker-start.sh prod pull
+./docker-start.sh prod restart
 
-# Container information
-docker inspect doroboto-frontend-1
-docker inspect doroboto-backend-1
+# Update development build
+./docker-start.sh dev build
+./docker-start.sh dev restart
 ```
 
-## 🔄 Updates and Maintenance
-
-### Updating the Application
-
-```bash
-# Pull latest changes
-git pull origin main
-
-# Rebuild and restart
-./docker-start.sh restart
-```
-
-### Backup and Restore
-
+### Backup
 ```bash
 # Backup uploaded files
-tar -czf doroboto-backup.tar.gz uploads/ test_files/
+tar -czf doroboto-backup-$(date +%Y%m%d).tar.gz doroboto-ui/uploads/
 
-# Restore
-tar -xzf doroboto-backup.tar.gz
+# Backup configuration
+cp docker-compose.yml docker-compose.yml.backup
 ```
 
 ## 🆘 Support
 
-For issues specific to Docker deployment:
+### Getting Help
+1. Check this documentation
+2. Review container logs: `./docker-start.sh logs`
+3. Check GitHub Issues: https://github.com/killcity/doroboto/issues
+4. Verify system requirements and architecture compatibility
 
-1. Check the logs: `./docker-start.sh logs`
-2. Verify system requirements
-3. Check Docker and Docker Compose versions
-4. Review this documentation
-5. Open an issue on GitHub with system details
+### Reporting Issues
+When reporting issues, please include:
+- Operating system and architecture
+- Docker version: `docker --version`
+- Docker Compose version: `docker compose version`
+- Container logs: `./docker-start.sh logs`
+- Steps to reproduce the issue
 
-### System Information Template
-
-```bash
-# Include this information when reporting issues
-echo "System: $(uname -a)"
-echo "Docker: $(docker --version)"
-echo "Docker Compose: $(docker-compose --version)"
-echo "Architecture: $(uname -m)"
-echo "Memory: $(free -h)"
-echo "Disk: $(df -h)"
-``` 
+### Contributing
+See the main README.md for contribution guidelines and development setup instructions. 
