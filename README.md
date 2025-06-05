@@ -16,26 +16,104 @@ A modern Next.js web application for controlling Arduino-powered pen plotters us
 
 ## 🚀 Quick Start
 
-### Native Installation
+### 🎯 **Method 1: One-Command Startup (Recommended)**
+
+The easiest way to get started - runs both frontend and backend automatically:
+
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd robot
+git clone https://github.com/killcity/doroboto.git
+cd doroboto
 
-# Option 1: Use the startup script (recommended)
+# Make startup script executable and run
+chmod +x start_doroboto.sh
 ./start_doroboto.sh
-
-# Option 2: Manual start
-cd doroboto-ui
-npm install
-npm run dev
 ```
 
-The application will be available at `http://localhost:3000` (or next available port).
+**What this does:**
+- ✅ Starts Node.js backend server on port 5001
+- ✅ Starts Next.js frontend on port 3000 (or next available)
+- ✅ Runs both concurrently with proper logging
+- ✅ Provides virtual plotter ports for testing
 
-### 🐳 Docker Deployment (Recommended)
+**Access the application:**
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5001
 
-For easy deployment on both **x86** and **ARM64** (Raspberry Pi) systems using pre-built images from GitHub Container Registry:
+### 🐳 **Method 2: Docker Deployment (Production Ready)**
+
+Uses pre-built images from GitHub Container Registry for easy deployment on any system.
+
+#### **📋 Docker Prerequisites**
+
+Before using Docker deployment, you need to install Docker on your system:
+
+**🪟 Windows:**
+1. Download [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+2. Run the installer and follow the setup wizard
+3. Restart your computer when prompted
+4. Launch Docker Desktop and complete the initial setup
+5. Verify installation: Open PowerShell/Command Prompt and run:
+   ```bash
+   docker --version
+   docker compose version
+   ```
+
+**🍎 macOS:**
+1. Download [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
+   - For Intel Macs: Choose "Mac with Intel chip"
+   - For Apple Silicon Macs: Choose "Mac with Apple chip"
+2. Open the downloaded `.dmg` file and drag Docker to Applications
+3. Launch Docker Desktop from Applications
+4. Complete the initial setup and sign in (optional)
+5. Verify installation in Terminal:
+   ```bash
+   docker --version
+   docker compose version
+   ```
+
+**🐧 Linux (Ubuntu/Debian):**
+```bash
+# Update package index
+sudo apt update
+
+# Install Docker
+sudo apt install -y docker.io docker-compose
+
+# Add your user to docker group (to run without sudo)
+sudo usermod -aG docker $USER
+
+# Start and enable Docker service
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Log out and back in, then verify
+docker --version
+docker compose version
+```
+
+**🐧 Linux (CentOS/RHEL/Fedora):**
+```bash
+# Install Docker
+sudo dnf install -y docker docker-compose  # Fedora
+# OR
+sudo yum install -y docker docker-compose  # CentOS/RHEL
+
+# Start and enable Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Verify installation
+docker --version
+docker compose version
+```
+
+#### **🚀 Docker Commands**
+
+Once Docker is installed, use these commands:
 
 ```bash
 # Clone the repository
@@ -45,45 +123,152 @@ cd doroboto
 # Make startup script executable
 chmod +x docker-start.sh
 
-# Start with Docker (production mode - uses registry images)
+# Production mode (uses pre-built registry images)
 ./docker-start.sh prod start
 
-# Or start in development mode (builds locally)
+# Development mode (builds images locally)
 ./docker-start.sh dev start
-```
 
-**Access the application:**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5001
-
-**Docker Commands:**
-```bash
-# Production mode (uses pre-built images)
-./docker-start.sh prod start    # Start services
+# Other useful commands
+./docker-start.sh prod logs     # View logs
 ./docker-start.sh prod stop     # Stop services
 ./docker-start.sh prod restart  # Restart services
-./docker-start.sh prod logs     # View logs
-./docker-start.sh prod pull     # Pull latest images
-
-# Development mode (builds locally)
-./docker-start.sh dev start     # Start with local build
-./docker-start.sh dev build     # Rebuild images
-./docker-start.sh dev logs      # View logs
+./docker-start.sh prod status   # Check status
+./docker-start.sh prod pull     # Update to latest images
 ```
 
-**🏗️ Automated Builds:**
-- Images are automatically built for both architectures using GitHub Actions
-- **Registry**: GitHub Container Registry (ghcr.io)
-- **Images**: 
-  - `ghcr.io/killcity/doroboto-frontend:latest`
-  - `ghcr.io/killcity/doroboto-backend:latest`
-- **Triggers**: Push to main, pull requests, and git tags
+**🌐 Access the application:**
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5001
 
-**Supported Architectures:**
-- ✅ **x86_64** (Intel/AMD desktop/server)
-- ✅ **ARM64** (Raspberry Pi 4, Apple Silicon)
+**💡 Docker Benefits:**
+- ✅ **Cross-platform**: Works on Windows, macOS, and Linux
+- ✅ **No dependencies**: Everything bundled in containers
+- ✅ **Consistent environment**: Same setup everywhere
+- ✅ **Easy updates**: Pull latest images with one command
+- ✅ **Production ready**: Optimized builds with multi-architecture support
 
-📖 **Full Docker documentation**: See [DOCKER.md](DOCKER.md) for detailed setup, troubleshooting, and Raspberry Pi specific instructions.
+**🔧 Troubleshooting:**
+- **Windows**: Make sure WSL2 is enabled and updated
+- **macOS**: Ensure Docker Desktop is running before commands
+- **Linux**: If permission denied, run `sudo usermod -aG docker $USER` and log out/in
+- **All platforms**: Check `docker --version` and `docker compose version` work
+
+### 🔧 **Method 3: Manual Development Setup**
+
+For development and customization:
+
+```bash
+# Clone the repository
+git clone https://github.com/killcity/doroboto.git
+cd doroboto/doroboto-ui
+
+# Install dependencies
+npm install
+
+# Option A: Run frontend and backend together
+npm run dev:full
+
+# Option B: Run separately (in different terminals)
+# Terminal 1 - Backend
+npm run backend
+
+# Terminal 2 - Frontend  
+npm run dev
+```
+
+**Manual Commands:**
+```bash
+# Frontend only (requires backend running separately)
+cd doroboto-ui
+npm run dev
+
+# Backend only
+cd doroboto-ui
+node backend/server.js
+
+# Build for production
+npm run build
+npm start
+```
+
+### 🧪 **Method 4: Test Mode (Virtual Hardware)**
+
+For testing without physical hardware:
+
+```bash
+# Clone the repository
+git clone https://github.com/killcity/doroboto.git
+cd doroboto
+
+# Activate Python virtual environment and run test server
+source venv/bin/activate
+python3 app_test.py
+
+# Or use the test startup script
+chmod +x start_test_mode.sh
+./start_test_mode.sh
+```
+
+**Test Mode Features:**
+- 🤖 Virtual GRBL plotters (no hardware needed)
+- 📋 Virtual ports: `/dev/ttyUSB0`, `/dev/ttyACM0`, `COM3`
+- ✨ Realistic command simulation and timing
+- 📍 Real-time position tracking
+- 🏠 Homing simulation
+
+### 🚨 **Troubleshooting Startup**
+
+**Port Conflicts:**
+```bash
+# If ports are in use, kill existing processes
+pkill -f "node backend/server.js"
+pkill -f "next dev"
+pkill -f "python3 app_test.py"
+
+# Or kill specific ports
+lsof -ti:3000,5001 | xargs kill -9
+```
+
+**Docker Issues:**
+```bash
+# Clean up Docker containers and images
+docker system prune -f
+
+# Rebuild from scratch
+./docker-start.sh dev build --no-cache
+```
+
+**Next.js Config Issues:**
+```bash
+# If you see "next.config.ts not supported" error
+cd doroboto-ui
+rm -rf .next
+npm run dev
+```
+
+### 📱 **Access URLs**
+
+Once running, access the application at:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:3000 | Main web interface |
+| **Backend API** | http://localhost:5001 | REST API endpoints |
+| **Test Mode** | http://localhost:5001 | Virtual plotter interface |
+
+**Alternative Ports:**
+- If port 3000 is busy, Next.js will try 3001, 3002, etc.
+- Backend always runs on port 5001
+
+### 🎯 **Quick Test**
+
+1. Start the application using any method above
+2. Open http://localhost:3000
+3. Select port `COM3` (virtual plotter)
+4. Click "Connect"
+5. Upload `test_files/simple_square.gcode`
+6. Click "Start Plot" to see it in action!
 
 ## 🔧 Architecture
 

@@ -2,6 +2,142 @@
 
 This guide covers Docker deployment for the DoRoboto pen plotter control system, supporting both x86_64 and ARM64 architectures (including Raspberry Pi).
 
+## 📋 Prerequisites
+
+Before deploying DoRoboto with Docker, you need to install Docker on your system:
+
+### 🪟 **Windows Installation**
+
+1. **Download Docker Desktop**:
+   - Visit [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+   - Download the installer for your system
+
+2. **System Requirements**:
+   - Windows 10 64-bit: Pro, Enterprise, or Education (Build 19041 or higher)
+   - OR Windows 11 64-bit: Home or Pro version 21H2 or higher
+   - WSL 2 feature enabled
+   - Virtualization enabled in BIOS
+
+3. **Installation Steps**:
+   ```bash
+   # Run the downloaded installer
+   # Follow the installation wizard
+   # Restart your computer when prompted
+   # Launch Docker Desktop from Start Menu
+   ```
+
+4. **Verify Installation**:
+   ```bash
+   # Open PowerShell or Command Prompt
+   docker --version
+   docker compose version
+   ```
+
+### 🍎 **macOS Installation**
+
+1. **Download Docker Desktop**:
+   - Visit [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
+   - Choose the correct version:
+     - **Intel Macs**: "Mac with Intel chip"
+     - **Apple Silicon Macs**: "Mac with Apple chip"
+
+2. **Installation Steps**:
+   ```bash
+   # Open the downloaded .dmg file
+   # Drag Docker.app to Applications folder
+   # Launch Docker from Applications
+   # Complete the initial setup
+   ```
+
+3. **Verify Installation**:
+   ```bash
+   # Open Terminal
+   docker --version
+   docker compose version
+   ```
+
+### 🐧 **Linux Installation**
+
+#### **Ubuntu/Debian:**
+```bash
+# Update package index
+sudo apt update
+
+# Install Docker and Docker Compose
+sudo apt install -y docker.io docker-compose
+
+# Add your user to docker group (to run without sudo)
+sudo usermod -aG docker $USER
+
+# Start and enable Docker service
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Log out and back in, then verify
+docker --version
+docker compose version
+```
+
+#### **CentOS/RHEL/Fedora:**
+```bash
+# Install Docker (choose your distro)
+sudo dnf install -y docker docker-compose  # Fedora
+# OR
+sudo yum install -y docker docker-compose  # CentOS/RHEL
+
+# Start and enable Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Log out and back in, then verify
+docker --version
+docker compose version
+```
+
+#### **Arch Linux:**
+```bash
+# Install Docker
+sudo pacman -S docker docker-compose
+
+# Start and enable Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Verify installation
+docker --version
+docker compose version
+```
+
+### 🔧 **Post-Installation Setup**
+
+After installing Docker on any platform:
+
+1. **Verify Docker is running**:
+   ```bash
+   docker run hello-world
+   ```
+
+2. **Test Docker Compose**:
+   ```bash
+   docker compose version
+   ```
+
+3. **If you get permission errors on Linux**:
+   ```bash
+   # Make sure you're in the docker group
+   groups $USER
+   
+   # If docker group is missing, add it and log out/in
+   sudo usermod -aG docker $USER
+   # Then log out and back in
+   ```
+
 ## 🚀 Quick Start
 
 ### Production Mode (Recommended)
