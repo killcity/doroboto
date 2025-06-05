@@ -14,6 +14,22 @@ A modern Next.js web application for controlling Arduino-powered pen plotters us
 - **Fixed Bed Size**: Optimized for 8.5" × 11" (216×279mm) plotting area
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 
+## 📸 Screenshots
+
+### Main Interface
+![DoRoboto Main Interface](screenshots/main-interface.png)
+*Modern pen plotter control interface with real-time G-code visualization*
+
+### G-code Visualization
+![G-code Visualization](screenshots/gcode-visualization.png)
+*Real-time preview of your drawings with smooth position tracking*
+
+### Manual Controls
+![Manual Jog Controls](screenshots/manual-controls.png)
+*Intuitive manual jog controls for precise positioning*
+
+> **📝 Note**: To add screenshots, capture images of the running application and save them in the `screenshots/` directory with the filenames shown above.
+
 ## 🚀 Quick Start
 
 ### 🎯 **Method 1: One-Command Startup (Recommended)**
