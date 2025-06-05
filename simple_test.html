@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple DoRoboto Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .panel {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        select {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 4px;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .connected { background: #1a5a1a; color: #4ade80; }
+        .disconnected { background: #5a1a1a; color: #f87171; }
+        .log {
+            height: 300px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖊️ Simple DoRoboto Connection Test</h1>
+        
+        <div class="panel">
+            <h3>Connection Test</h3>
+            <select id="portSelect">
+                <option value="">Loading ports...</option>
+            </select>
+            <button id="connectBtn" onclick="toggleConnection()">Connect</button>
+            <div id="status" class="status disconnected">Disconnected</div>
+        </div>
+        
+        <div class="panel">
+            <h3>Debug Log</h3>
+            <div id="log" class="log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let connected = false;
+        let selectedPort = '';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#74c0fc';
+            logDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function updateStatus(isConnected, port = '') {
+            const statusDiv = document.getElementById('status');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            connected = isConnected;
+            
+            if (isConnected) {
+                statusDiv.textContent = `Connected to ${port}`;
+                statusDiv.className = 'status connected';
+                connectBtn.textContent = 'Disconnect';
+            } else {
+                statusDiv.textContent = 'Disconnected';
+                statusDiv.className = 'status disconnected';
+                connectBtn.textContent = 'Connect';
+            }
+        }
+        
+        async function loadPorts() {
+            try {
+                log('Loading available ports...', 'info');
+                const response = await fetch('http://localhost:5001/api/ports');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`Found ${data.ports.length} ports: ${data.ports.join(', ')}`, 'success');
+                
+                const select = document.getElementById('portSelect');
+                select.innerHTML = '<option value="">Select port...</option>';
+                
+                data.ports.forEach(port => {
+                    const option = document.createElement('option');
+                    option.value = port;
+                    option.textContent = port;
+                    select.appendChild(option);
+                });
+                
+            } catch (error) {
+                log(`Failed to load ports: ${error.message}`, 'error');
+                document.getElementById('portSelect').innerHTML = '<option value="">Error loading ports</option>';
+            }
+        }
+        
+        async function connect() {
+            const portSelect = document.getElementById('portSelect');
+            selectedPort = portSelect.value;
+            
+            if (!selectedPort) {
+                log('Please select a port first', 'error');
+                return;
+            }
+            
+            try {
+                log(`Attempting to connect to ${selectedPort}...`, 'info');
+                
+                const response = await fetch('http://localhost:5001/api/connect', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ port: selectedPort })
+                });
+                
+                log(`Response status: ${response.status} ${response.statusText}`, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`Response data: ${JSON.stringify(data)}`, 'info');
+                
+                if (data.success) {
+                    updateStatus(true, selectedPort);
+                    log(`Successfully connected to ${selectedPort}`, 'success');
+                } else {
+                    log(`Connection failed: ${data.message}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`Connection error: ${error.message}`, 'error');
+                updateStatus(false);
+            }
+        }
+        
+        async function disconnect() {
+            try {
+                log('Disconnecting...', 'info');
+                
+                const response = await fetch('http://localhost:5001/api/disconnect', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`Disconnect response: ${JSON.stringify(data)}`, 'info');
+                
+                updateStatus(false);
+                log('Disconnected successfully', 'success');
+                
+            } catch (error) {
+                log(`Disconnect error: ${error.message}`, 'error');
+            }
+        }
+        
+        function toggleConnection() {
+            if (connected) {
+                disconnect();
+            } else {
+                connect();
+            }
+        }
+        
+        // Initialize
+        log('Initializing Simple DoRoboto Test...', 'info');
+        log('Backend URL: http://localhost:5001', 'info');
+        loadPorts();
+    </script>
+</body>
+</html> 
