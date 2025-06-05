@@ -16,22 +16,21 @@ A modern Next.js web application for controlling Arduino-powered pen plotters us
 
 ## 📸 Screenshots
 
-> **📸 Screenshots Coming Soon!**
-> 
-> The DoRoboto application is fully functional and ready to use. Screenshots will be added to showcase:
-> 
-> - **Main Interface**: Modern pen plotter control interface with real-time G-code visualization
-> - **G-code Visualization**: Real-time preview of your drawings with smooth position tracking  
-> - **Manual Controls**: Intuitive manual jog controls for precise positioning
->
-> **To add screenshots:**
-> 1. Start the application using `./start_doroboto.sh`
-> 2. Access the interface at http://localhost:3000
-> 3. Capture screenshots of the main interface, G-code visualization, and manual controls
-> 4. Save them in the `screenshots/` directory as:
->    - `main-interface.png`
->    - `gcode-visualization.png` 
->    - `manual-controls.png`
+### 🖊️ Main Interface
+
+![DoRoboto Main Interface](screenshots/doroboto-main.jpg)
+
+*Modern pen plotter control interface featuring real-time G-code visualization, intuitive manual jog controls, and seamless file upload capabilities. The interface shows the clean, professional design with all essential controls easily accessible.*
+
+**Key Features Shown:**
+- ✅ **Real-time G-code Visualization**: Live preview of your drawings with smooth position tracking
+- ✅ **Manual Jog Controls**: Intuitive X+/X-/Y+/Y-/Z+/Z- axis controls with customizable step sizes
+- ✅ **File Upload Interface**: Drag & drop or browse to upload G-code files (.mmg, .gcode, .nc, .cnc)
+- ✅ **Connection Status**: Clear visual indicators for plotter connection and status
+- ✅ **Modern Design**: Clean, responsive interface built with Next.js, React, and Tailwind CSS
+
+> **📸 More Screenshots Coming Soon!**
+> Additional screenshots will showcase G-code visualization in action and detailed manual control features.
 
 ## 🚀 Quick Start
 
