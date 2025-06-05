@@ -1,0 +1,59 @@
+services:
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./doroboto-ui
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:5001
+    volumes:
+      - ./doroboto-ui/src:/app/src
+      - ./doroboto-ui/public:/app/public
+      - ./doroboto-ui/package.json:/app/package.json
+      - ./doroboto-ui/package-lock.json:/app/package-lock.json
+      - ./doroboto-ui/next.config.js:/app/next.config.js
+      - ./doroboto-ui/tailwind.config.ts:/app/tailwind.config.ts
+      - ./doroboto-ui/tsconfig.json:/app/tsconfig.json
+      - ./doroboto-ui/postcss.config.mjs:/app/postcss.config.mjs
+      # Named volumes for node_modules and .next to persist across container restarts
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/.next
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - doroboto-network
+
+  # Node.js Backend
+  backend:
+    build:
+      context: ./doroboto-ui
+      dockerfile: Dockerfile.backend
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+    volumes:
+      - ./uploads:/app/uploads
+      - ./test_files:/app/test_files
+      - ./doroboto-ui/backend:/app/backend
+      - ./doroboto-ui/package.json:/app/package.json
+      - ./doroboto-ui/package-lock.json:/app/package-lock.json
+      # Named volume for node_modules
+      - backend_node_modules:/app/node_modules
+    restart: unless-stopped
+    networks:
+      - doroboto-network
+
+volumes:
+  frontend_node_modules:
+  frontend_next:
+  backend_node_modules:
+
+networks:
+  doroboto-network:
+    driver: bridge 

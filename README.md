@@ -16,6 +16,7 @@ A modern Next.js web application for controlling Arduino-powered pen plotters us
 
 ## 🚀 Quick Start
 
+### Native Installation
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -31,6 +32,41 @@ npm run dev
 ```
 
 The application will be available at `http://localhost:3000` (or next available port).
+
+### 🐳 Docker Deployment (Recommended)
+
+For easy deployment on both **x86** and **ARM64** (Raspberry Pi) systems:
+
+```bash
+# Clone the repository
+git clone https://github.com/killcity/doroboto.git
+cd doroboto
+
+# Make startup script executable
+chmod +x docker-start.sh
+
+# Start with Docker (auto-detects architecture)
+./docker-start.sh
+```
+
+**Access the application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5001
+
+**Docker Commands:**
+```bash
+./docker-start.sh start    # Start services
+./docker-start.sh stop     # Stop services
+./docker-start.sh restart  # Restart services
+./docker-start.sh logs     # View logs
+./docker-start.sh status   # Check status
+```
+
+**Supported Architectures:**
+- ✅ **x86_64** (Intel/AMD desktop/server)
+- ✅ **ARM64** (Raspberry Pi 4, Apple Silicon)
+
+📖 **Full Docker documentation**: See [DOCKER.md](DOCKER.md) for detailed setup, troubleshooting, and Raspberry Pi specific instructions.
 
 ## 🔧 Architecture
 

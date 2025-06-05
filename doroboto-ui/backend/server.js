@@ -127,6 +127,15 @@ function parseGcode(content) {
 }
 
 // API Routes
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: '1.0.0'
+  });
+});
+
 app.get('/api/ports', (req, res) => {
   res.json({ ports: virtualPorts });
 });
